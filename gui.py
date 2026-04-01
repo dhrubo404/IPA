@@ -1,14 +1,12 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-
 def simulate_mm1(lambda_rate, mu_rate, N, seed):
- 
+
     if lambda_rate <= 0 or mu_rate <= 0:
         raise ValueError("lambda_rate and mu_rate must be positive.")
     if lambda_rate >= mu_rate:
@@ -16,7 +14,7 @@ def simulate_mm1(lambda_rate, mu_rate, N, seed):
 
     rng = np.random.default_rng(seed)
 
-    # Generate random variables
+    # Generate primitive random variables
     interarrivals = rng.exponential(scale=1 / lambda_rate, size=N)
     services = rng.exponential(scale=1 / mu_rate, size=N)
 
@@ -52,13 +50,7 @@ def simulate_mm1(lambda_rate, mu_rate, N, seed):
     }
 
 
-
 def ipa_estimators_mm1(lambda_rate, mu_rate, N, seed):
-    """
-    Simulate M/M/1 and compute IPA derivative estimators for:
-      - dJ/dmu
-      - dJ/dlambda
-    """
 
     rng = np.random.default_rng(seed)
 
@@ -133,7 +125,7 @@ def clear_plot_frame():
 
 
 def add_plot(parent, row, col, xdata, ydata, theory_value, xlabel, ylabel, title, line_label, theory_label):
-    fig = Figure(figsize=(3.6, 2.6), dpi=100)
+    fig = Figure(figsize=(3.9, 2.8), dpi=100)
     ax = fig.add_subplot(111)
 
     ax.plot(xdata, ydata, linewidth=1.2, label=line_label)
@@ -169,8 +161,6 @@ def run_gui_simulation():
         if lambda_rate >= mu_rate:
             raise ValueError("System unstable: need lambda < mu.")
 
-        """## Simulation and basic plots"""
-
         sim = simulate_mm1(lambda_rate, mu_rate, N, seed)
         arrivals = sim["arrivals"]
         departures = sim["departures"]
@@ -186,9 +176,9 @@ def run_gui_simulation():
         theory_dJ_dmu = -1 / (mu_rate - lambda_rate) ** 2
         theory_dJ_dlambda = 1 / (mu_rate - lambda_rate) ** 2
 
-        mean_est_var.set(f"{out['running_J'][-1]:.6f}")
+        mean_est_var.set(f"{running_mean_T[-1]:.6f}")
         mean_theory_var.set(f"{theory_J:.6f}")
-        mean_error_var.set(f"{abs(out['running_J'][-1] - theory_J):.6f}")
+        mean_error_var.set(f"{abs(running_mean_T[-1] - theory_J):.6f}")
 
         dmu_est_var.set(f"{out['running_dJ_dmu'][-1]:.6f}")
         dmu_theory_var.set(f"{theory_dJ_dmu:.6f}")
@@ -199,7 +189,7 @@ def run_gui_simulation():
         dlambda_error_var.set(f"{abs(out['running_dJ_dlambda'][-1] - theory_dJ_dlambda):.6f}")
 
         sample_avg_var.set(f"{np.mean(system_times):.6f}")
-        sample_theory_var.set(f"{1 / (mu_rate - lambda_rate):.6f}")
+        sample_theory_var.set(f"{theory_J:.6f}")
 
         clear_plot_frame()
 
@@ -213,7 +203,7 @@ def run_gui_simulation():
             theory_J,
             "Number of customers",
             "Mean system time",
-            "Convergence of Mean System Time",
+            "Convergence of Mean System Time to Theoretical Mean",
             "Running estimate of mean system time",
             "Theoretical mean"
         )
@@ -224,8 +214,8 @@ def run_gui_simulation():
             out["running_dJ_dmu"],
             theory_dJ_dmu,
             "Number of customers",
-            "dJ/dmu",
-            "Convergence of IPA estimate for dJ/dmu",
+            r"$\frac{dJ}{d\mu}$",
+            "Convergence of IPA estimate for derivative w.r.t. service rate",
             "IPA estimate",
             "Theoretical estimate"
         )
@@ -236,8 +226,8 @@ def run_gui_simulation():
             out["running_dJ_dlambda"],
             theory_dJ_dlambda,
             "Number of customers",
-            "dJ/dlambda",
-            "Convergence of IPA estimate for dJ/dlambda",
+            r"$\frac{dJ}{d\lambda}$",
+            "Convergence of IPA estimate for derivative w.r.t. arrival rate",
             "IPA estimate",
             "Theoretical estimate"
         )
@@ -246,7 +236,6 @@ def run_gui_simulation():
 
     except ValueError as e:
         messagebox.showerror("Input Error", str(e))
-
 
 
 root = tk.Tk()
@@ -262,7 +251,6 @@ style.configure("CardTitle.TLabel", background="white", font=("Segoe UI", 12, "b
 style.configure("Body.TLabel", background="white", font=("Segoe UI", 10))
 style.configure("Value.TLabel", background="white", font=("Segoe UI", 10, "bold"))
 style.configure("Run.TButton", font=("Segoe UI", 10, "bold"), padding=6)
-
 
 outer_frame = tk.Frame(root, bg="#f2f4f7")
 outer_frame.pack(fill="both", expand=True)
@@ -280,13 +268,14 @@ canvas.pack(side="left", fill="both", expand=True)
 main_frame = ttk.Frame(canvas)
 canvas_window = canvas.create_window((0, 0), window=main_frame, anchor="nw")
 
+
 def resize_canvas_window(event):
     canvas.itemconfig(canvas_window, width=event.width)
+
 
 canvas.bind("<Configure>", resize_canvas_window)
 main_frame.bind("<Configure>", update_scrollregion)
 canvas.bind_all("<MouseWheel>", _on_mousewheel)
-
 
 input_card = ttk.Frame(main_frame, style="Card.TFrame", padding=16)
 input_card.pack(fill="x", padx=16, pady=(16, 12))
@@ -319,7 +308,6 @@ ttk.Button(input_card, text="Run Simulation", style="Run.TButton", command=run_g
     row=3, column=0, columnspan=4, pady=(12, 0)
 )
 
-
 results_card = ttk.Frame(main_frame, style="Card.TFrame", padding=16)
 results_card.pack(fill="x", padx=16, pady=(0, 12))
 
@@ -348,8 +336,8 @@ dlambda_error_var = tk.StringVar(value="—")
 
 rows = [
     ("Mean system time estimate", mean_est_var, mean_theory_var, mean_error_var),
-    ("IPA estimate dJ/dmu", dmu_est_var, dmu_theory_var, dmu_error_var),
-    ("IPA estimate dJ/dlambda", dlambda_est_var, dlambda_theory_var, dlambda_error_var),
+    ("IPA estimate dJ/dμ", dmu_est_var, dmu_theory_var, dmu_error_var),
+    ("IPA estimate dJ/dλ", dlambda_est_var, dlambda_theory_var, dlambda_error_var),
 ]
 
 for i, row in enumerate(rows, start=2):
@@ -357,7 +345,6 @@ for i, row in enumerate(rows, start=2):
     ttk.Label(results_card, textvariable=row[1], style="Body.TLabel").grid(row=i, column=1, padx=20, pady=4, sticky="w")
     ttk.Label(results_card, textvariable=row[2], style="Body.TLabel").grid(row=i, column=2, padx=20, pady=4, sticky="w")
     ttk.Label(results_card, textvariable=row[3], style="Body.TLabel").grid(row=i, column=3, padx=20, pady=4, sticky="w")
-
 
 plot_card = ttk.Frame(main_frame, style="Card.TFrame", padding=10)
 plot_card.pack(fill="both", expand=True, padx=16, pady=(0, 16))
