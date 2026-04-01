@@ -52,82 +52,6 @@ def simulate_mm1(lambda_rate, mu_rate, N, seed):
     }
 
 
-"""## IPA estimator with respect to the arrival rate $\mu$
-
-$$W_i = \max\{0,\;W_{i-1}+S_{i-1}-A_i\}$$
-
-So on sample paths where the inside of the max is positive,
-
-$$D_i^{(\mu)}=D_{i-1}^{(μ)}+\frac{dS_{i-1}}{dμ}$$
-
-If system becomes empty before customer $i$, the pertubation resets to zero:
-$$D_i^{(\mu)}=\begin{cases}D_{i-1}^{(\mu)} - \dfrac{S_{i-1}}{\mu}, & \text{if } W_{i-1}+S_{i-1}-A_i > 0,\\[1em]
-0, & \text{otherwise.}\end{cases}$$
-
-Since
-$$T_i = W_i+S_i,$$
-
-we get
-
-$$\frac{dT_i}{d\mu}=D_i^{(\mu)}-\frac{S_i}{\mu}$$
-
-Therefore IPA estimator is
-$$\boxed{
-\left[\frac{dJ}{d\mu}\right]_{\text{IPA}}
-=
-\frac{1}{N}\sum_{i=1}^N \left(D_i^{(\mu)} - \frac{S_i}{\mu}\right)
-}$$
-
-## IPA estimator with respect to the arrival rate $\lambda$
-
-Write interarrival times as
-$$
-A_i = \frac{-\ln V_i}{\lambda}.
-$$
-Then
-$$
-\frac{dA_i}{d\lambda} = -\frac{A_i}{\lambda}.
-$$
-
-Let
-$$
-D_i^{(\lambda)} = \frac{dW_i}{d\lambda}.
-$$
-
-Again from Lindley's recursion, when the queue remains busy,
-$$
-D_i^{(\lambda)}
-= D_{i-1}^{(\lambda)} - \frac{dA_i}{d\lambda}
-= D_{i-1}^{(\lambda)} + \frac{A_i}{\lambda}.
-$$
-If the system empties before customer $i$, the perturbation is reset:
-$$
-D_i^{(\lambda)} =
-\begin{cases}
-D_{i-1}^{(\lambda)} + \dfrac{A_i}{\lambda}, & \text{if } W_{i-1}+S_{i-1}-A_i > 0,\\[1em]
-0, & \text{otherwise.}
-\end{cases}
-$$
-
-Since service times do not depend on $\lambda$,
-
-$$\frac{dT_i}{d\lambda} = D_i^{(\lambda)}.$$
-
-
-Thus
-$$
-\boxed{
-\left[\frac{dJ}{d\lambda}\right]_{\text{IPA}}
-=
-\frac{1}{N}\sum_{i=1}^N D_i^{(\lambda)}
-}
-$$
-
-### Interpretation
-
-A perturbation in an interarrival time affects future waiting times only if it occurs during a busy period. Once the system empties, that perturbation no longer propagates.
-"""
-
 
 def ipa_estimators_mm1(lambda_rate, mu_rate, N, seed):
     """
@@ -324,9 +248,7 @@ def run_gui_simulation():
         messagebox.showerror("Input Error", str(e))
 
 
-# --------------------------------------------------
-# Main window
-# --------------------------------------------------
+
 root = tk.Tk()
 root.title("IPA M/M/1 Simulator")
 root.geometry("1280x760")
@@ -341,9 +263,7 @@ style.configure("Body.TLabel", background="white", font=("Segoe UI", 10))
 style.configure("Value.TLabel", background="white", font=("Segoe UI", 10, "bold"))
 style.configure("Run.TButton", font=("Segoe UI", 10, "bold"), padding=6)
 
-# --------------------------------------------------
-# Scrollable container
-# --------------------------------------------------
+
 outer_frame = tk.Frame(root, bg="#f2f4f7")
 outer_frame.pack(fill="both", expand=True)
 
@@ -367,9 +287,7 @@ canvas.bind("<Configure>", resize_canvas_window)
 main_frame.bind("<Configure>", update_scrollregion)
 canvas.bind_all("<MouseWheel>", _on_mousewheel)
 
-# --------------------------------------------------
-# Input card
-# --------------------------------------------------
+
 input_card = ttk.Frame(main_frame, style="Card.TFrame", padding=16)
 input_card.pack(fill="x", padx=16, pady=(16, 12))
 
@@ -401,9 +319,7 @@ ttk.Button(input_card, text="Run Simulation", style="Run.TButton", command=run_g
     row=3, column=0, columnspan=4, pady=(12, 0)
 )
 
-# --------------------------------------------------
-# Results card
-# --------------------------------------------------
+
 results_card = ttk.Frame(main_frame, style="Card.TFrame", padding=16)
 results_card.pack(fill="x", padx=16, pady=(0, 12))
 
@@ -442,9 +358,7 @@ for i, row in enumerate(rows, start=2):
     ttk.Label(results_card, textvariable=row[2], style="Body.TLabel").grid(row=i, column=2, padx=20, pady=4, sticky="w")
     ttk.Label(results_card, textvariable=row[3], style="Body.TLabel").grid(row=i, column=3, padx=20, pady=4, sticky="w")
 
-# --------------------------------------------------
-# Plot card
-# --------------------------------------------------
+
 plot_card = ttk.Frame(main_frame, style="Card.TFrame", padding=10)
 plot_card.pack(fill="both", expand=True, padx=16, pady=(0, 16))
 
