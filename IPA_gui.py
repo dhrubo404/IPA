@@ -239,7 +239,7 @@ def run_gui_simulation():
 
 
 root = tk.Tk()
-root.title("IPA M/M/1 Simulator")
+root.title("IPA M/M/1 Simulator - Dhrubo Chattoraj")
 root.geometry("1280x760")
 root.configure(bg="#f2f4f7")
 
